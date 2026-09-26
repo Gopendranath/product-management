@@ -69,6 +69,8 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - Search + category + sort do not compose server-side; listing combines within the returned page.
 - Mock auth gates `/products/new` only; listing/details public. Demo-only, bypassable. No test accounts needed.
 - Categories fall back to `beauty, fragrances, furniture, groceries` when the API fails.
+- Lint is Biome (`pnpm lint`), not ESLint — scaffold default, accepted deviation from `TODO.md` §0 label.
+- Git root is `application/`; specs (`HLD.md`, `LLD/`, `DESIGN.md`, `TODO.md`) live one level up, outside the repo.
 
 ## Time spent
 
