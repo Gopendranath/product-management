@@ -202,7 +202,7 @@ export default function ListingPage(): React.JSX.Element {
               </div>
             ) : (
               <section
-                className="overflow-x-auto rounded-lg border"
+                className="overflow-x-auto"
                 // biome-ignore lint/a11y/noNoninteractiveTabindex: scroll region keyboard access
                 tabIndex={0}
                 aria-label="Products table"

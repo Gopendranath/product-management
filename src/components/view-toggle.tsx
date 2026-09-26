@@ -15,7 +15,7 @@ export function ViewToggle({
   onChange,
 }: ViewToggleProps): React.JSX.Element {
   return (
-    <fieldset className="inline-flex items-center gap-0.5 rounded-md border bg-surface p-0.5">
+    <fieldset className="inline-flex items-center gap-0.5 p-0.5">
       <legend className="sr-only">Change layout</legend>
       <button
         type="button"

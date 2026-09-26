@@ -21,7 +21,7 @@ export function ListingSkeletons({
 }): React.JSX.Element {
   if (view === "table") {
     return (
-      <div className="overflow-x-auto rounded-lg border" aria-hidden>
+      <div className="overflow-x-auto" aria-hidden>
         <Table className="min-w-[720px]">
           <ListingTableHead />
           <TableBody>
