@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useToasts } from "@/store/toast-context";
+import { cn } from "cn";
 import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react";
 
 /** Live-region toast stack. Queue rules (dedupe, max 3, dismiss) live in context. */
@@ -17,31 +18,34 @@ export function Toaster(): React.JSX.Element {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border bg-surface px-4 py-3 text-ink shadow-lg"
+          className={cn(
+            "pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-lg border border-transparent px-4 py-2 shadow-lg",
+            toast.kind === "success"
+              ? "bg-success text-success-text"
+              : "bg-error text-error-text",
+          )}
         >
           {toast.kind === "success" ? (
             <CheckCircle
               aria-hidden
               weight="fill"
-              className="mt-0.5 size-5 shrink-0 text-success-text"
+              className="size-5 shrink-0"
             />
           ) : (
             <WarningCircle
               aria-hidden
               weight="fill"
-              className="mt-0.5 size-5 shrink-0 text-error-text"
+              className="size-5 shrink-0"
             />
           )}
-          <p className="min-h-[44px] flex-1 text-sm leading-snug">
-            {toast.message}
-          </p>
+          <p className="flex-1 text-sm leading-snug">{toast.message}</p>
           <Button
             type="button"
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             aria-label="Dismiss notification"
             onClick={() => dismissToast(toast.id)}
-            className="min-h-[44px] min-w-[44px] shrink-0"
+            className="-mr-2 min-h-[44px] min-w-[44px] shrink-0 opacity-70 hover:opacity-100"
           >
             <X aria-hidden />
           </Button>

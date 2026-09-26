@@ -190,10 +190,10 @@ export function SiteHeader(): React.JSX.Element {
               href={link.href}
               aria-current={pathname === link.href ? "page" : undefined}
               className={cn(
-                "inline-flex min-h-[44px] items-center rounded-sm border-b-2 px-3 text-sm font-medium whitespace-nowrap transition-colors",
+                "inline-flex min-h-[44px] items-center rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors",
                 pathname === link.href
-                  ? "border-accent text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground",
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
               )}
             >
               {link.label}
