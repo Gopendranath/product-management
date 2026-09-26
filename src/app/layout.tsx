@@ -34,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           strategy="beforeInteractive"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: static no-flash bootstrap, zero interpolation
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem("theme-v1");var m=s?JSON.parse(s):null;if(m!=="dark"&&m!=="light"){m=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}var d=document.documentElement;d.classList.toggle("dark",m==="dark");d.style.colorScheme=m;}catch(e){}})();`,
+            __html: `(function(){var bg="#F4F4F0";try{var s=localStorage.getItem("theme-v1");var m=s?JSON.parse(s):null;if(m!=="dark"&&m!=="light"){m=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}var d=document.documentElement;d.classList.toggle("dark",m==="dark");d.style.colorScheme=m;bg=m==="dark"?"#0A0A0A":"#F4F4F0";}catch(e){}document.documentElement.style.backgroundColor=bg;})();`,
           }}
         />
         <AppProviders>
