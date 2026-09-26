@@ -39,24 +39,22 @@ export function ListingToolbar({
 }: ListingToolbarProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl tracking-tight md:text-4xl">Products</h1>
-          <p className="mt-1 max-w-[65ch] text-base text-muted-foreground">
-            Browse, search, and manage the catalog.
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-3xl tracking-tight md:text-4xl">Products</h1>
         <Button
           nativeButton={false}
           render={<Link href="/products/new" />}
-          className="min-h-[44px]"
+          className="min-h-[44px] shrink-0"
         >
           <Plus data-icon="inline-start" />
           Add product
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_200px_200px_140px]">
-        <div className="relative">
+      <p className="max-w-[65ch] text-base text-muted-foreground">
+        Browse, search, and manage the catalog.
+      </p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-6 lg:grid-cols-[1fr_200px_200px_140px]">
+        <div className="relative sm:col-span-6 lg:col-span-1">
           <Label htmlFor="product-search" className="sr-only">
             Search products
           </Label>
@@ -74,7 +72,7 @@ export function ListingToolbar({
             className="min-h-[44px] pl-9"
           />
         </div>
-        <div>
+        <div className="sm:col-span-2 lg:col-span-1">
           <Label htmlFor="category-filter" className="sr-only">
             Filter by category
           </Label>
@@ -101,7 +99,7 @@ export function ListingToolbar({
             </SelectContent>
           </Select>
         </div>
-        <div>
+        <div className="sm:col-span-2 lg:col-span-1">
           <Label htmlFor="sort-filter" className="sr-only">
             Sort by
           </Label>
@@ -127,7 +125,7 @@ export function ListingToolbar({
             </SelectContent>
           </Select>
         </div>
-        <div>
+        <div className="sm:col-span-2 lg:col-span-1">
           <Label htmlFor="order-filter" className="sr-only">
             Sort order
           </Label>

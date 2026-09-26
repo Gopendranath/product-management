@@ -45,10 +45,14 @@ export const ProductCard = memo(function ProductCard({
       </div>
       <CardContent className="flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base leading-snug font-medium">
+          <h3 className="min-w-0 flex-1 text-base leading-snug font-medium text-balance">
             {product.title}
           </h3>
-          <FavButton isFav={isFav} onToggle={() => onToggleFav(product.id)} />
+          <FavButton
+            isFav={isFav}
+            onToggle={() => onToggleFav(product.id)}
+            className="shrink-0"
+          />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">{product.category}</Badge>
@@ -68,6 +72,7 @@ export const ProductCard = memo(function ProductCard({
       </CardContent>
       <CardFooter>
         <Button
+          variant="outline"
           nativeButton={false}
           render={<Link href={`/products/${product.id}`} />}
           className="min-h-[44px] w-full"
