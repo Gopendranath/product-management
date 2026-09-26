@@ -1,10 +1,10 @@
 "use client";
 
+import { ThemeProvider } from "@/components/theme-provider";
 import { FavsProvider } from "@/store/favs-context";
 import { FilterProvider } from "@/store/filter-context";
 import { LocalProductsProvider } from "@/store/local-products-context";
 import { MockAuthProvider } from "@/store/mock-auth-context";
-import { AppThemeProvider } from "@/store/theme-context";
 import { ToastProvider } from "@/store/toast-context";
 
 /**
@@ -17,7 +17,7 @@ export function AppProviders({
   children: React.ReactNode;
 }): React.JSX.Element {
   return (
-    <AppThemeProvider>
+    <ThemeProvider>
       <ToastProvider>
         <FilterProvider>
           <FavsProvider>
@@ -27,6 +27,6 @@ export function AppProviders({
           </FavsProvider>
         </FilterProvider>
       </ToastProvider>
-    </AppThemeProvider>
+    </ThemeProvider>
   );
 }
