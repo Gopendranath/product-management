@@ -74,4 +74,5 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 
 ## Time spent
 
-- Setup + tooling: this scaffold pass.
+- Setup + tooling: scaffold pass.
+- Design tokens: `globals.css` token pass (palette, semantics, radius, ease, z, focus, shimmer, reduced-motion).
