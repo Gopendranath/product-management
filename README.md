@@ -80,3 +80,4 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - api-client: `src/types/` + `src/services/client.ts` (single-axis, typed errors, 21-check sanity).
 - app-state: `src/store/` six split providers (17-check sanity on pure transitions).
 - product-listing: `/` toolbar + cards/table + pagination + combine/total rules (SSR smoke ok).
+- product-details: `/products/[id]` SSR prefetch + locals-first + gallery (smoke: valid/invalid/temp ok).
