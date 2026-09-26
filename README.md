@@ -2,7 +2,7 @@
 
 Responsive product dashboard. Browse, search, filter, sort, and paginate [DummyJSON](https://dummyjson.com/products) products, view details, add products via a validated form. Hiring assignment scope (~8h). Quality and maintainability over breadth.
 
-Live URL: `TODO: add Vercel prod URL here` (preview deploys per PR).
+Live URL: `TODO: add Vercel prod URL here` (preview deploys per PR). Repo: `https://github.com/Gopendranath/product-management`.
 
 ## Setup
 
