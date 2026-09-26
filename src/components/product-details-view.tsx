@@ -247,7 +247,7 @@ export function ProductDetailsView({
             <Link
               href="/"
               onClick={(event) => handleCategory(event, product.category)}
-              className="rounded-full"
+              className="inline-flex min-h-[44px] items-center rounded-full"
             >
               <Badge variant="secondary">{product.category}</Badge>
             </Link>

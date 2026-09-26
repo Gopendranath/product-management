@@ -20,16 +20,25 @@ interface ProductRowProps {
   product: Product;
   isFav: boolean;
   onToggleFav: (id: number) => void;
+  index: number;
 }
 
 export const ProductRow = memo(function ProductRow({
   product,
   isFav,
   onToggleFav,
+  index,
 }: ProductRowProps): React.JSX.Element {
   const status = stockStatus(product.stock);
   return (
-    <TableRow>
+    <TableRow
+      className="reveal"
+      style={
+        {
+          "--reveal-delay": `${Math.min(index * 60, 600)}ms`,
+        } as React.CSSProperties
+      }
+    >
       <TableCell>
         <div className="relative h-16 w-16 overflow-hidden rounded-md">
           <ProductImage

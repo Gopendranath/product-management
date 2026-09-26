@@ -61,8 +61,8 @@ export function PaginationControls({
             aria-disabled={disabled ?? page <= 1}
             className={
               (disabled ?? page <= 1)
-                ? "pointer-events-none opacity-50"
-                : undefined
+                ? "pointer-events-none min-h-[44px] opacity-50"
+                : "min-h-[44px]"
             }
           />
         </PaginationItem>
@@ -82,7 +82,9 @@ export function PaginationControls({
                 }}
                 aria-disabled={disabled}
                 className={
-                  disabled ? "pointer-events-none opacity-50" : undefined
+                  disabled
+                    ? "pointer-events-none min-h-[44px] min-w-[44px] opacity-50"
+                    : "min-h-[44px] min-w-[44px]"
                 }
               >
                 {entry}
@@ -100,8 +102,8 @@ export function PaginationControls({
             aria-disabled={disabled ?? page >= totalPages}
             className={
               (disabled ?? page >= totalPages)
-                ? "pointer-events-none opacity-50"
-                : undefined
+                ? "pointer-events-none min-h-[44px] opacity-50"
+                : "min-h-[44px]"
             }
           />
         </PaginationItem>

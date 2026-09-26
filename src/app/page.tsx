@@ -189,13 +189,22 @@ export default function ListingPage(): React.JSX.Element {
               {displayTotal} {displayTotal === 1 ? "product" : "products"}
             </p>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 md:hidden">
-              {items.map((product) => (
-                <ProductCard
+              {items.map((product, index) => (
+                <div
                   key={product.id}
-                  product={product}
-                  isFav={favIds.includes(product.id)}
-                  onToggleFav={toggleFav}
-                />
+                  className="reveal h-full"
+                  style={
+                    {
+                      "--reveal-delay": `${Math.min(index * 60, 600)}ms`,
+                    } as React.CSSProperties
+                  }
+                >
+                  <ProductCard
+                    product={product}
+                    isFav={favIds.includes(product.id)}
+                    onToggleFav={toggleFav}
+                  />
+                </div>
               ))}
             </div>
             <div className="hidden md:block">
@@ -212,9 +221,10 @@ export default function ListingPage(): React.JSX.Element {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items.map((product) => (
+                  {items.map((product, index) => (
                     <ProductRow
                       key={product.id}
+                      index={index}
                       product={product}
                       isFav={favIds.includes(product.id)}
                       onToggleFav={toggleFav}

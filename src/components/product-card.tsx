@@ -73,6 +73,7 @@ export const ProductCard = memo(function ProductCard({
         <Button
           nativeButton={false}
           render={<Link href={`/products/${product.id}`} />}
+          className="min-h-[44px] w-full"
         >
           View Details
         </Button>

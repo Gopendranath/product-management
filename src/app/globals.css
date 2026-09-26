@@ -4,6 +4,15 @@
 
 @custom-variant dark (&:is(.dark *, :root[data-theme="dark"] *));
 
+/* Hover only on fine pointers: no sticky hover on touch. */
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /*
  * DESIGN.md tokens — single strategy: CSS vars + dark: class via next-themes
  * ([data-theme="dark"] also honored; both selectors map to the same dark set).
@@ -190,6 +199,32 @@
   }
 }
 
+/* Reveal: fade-up 12px, 200ms ease-out, stagger via --reveal-delay (cap 600ms) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-only {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.reveal {
+  animation: rise 200ms var(--ease-out) backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -212,6 +247,10 @@
     animation-iteration-count: 1 !important;
     /* biome-ignore lint/complexity/noImportantStyles: reduced-motion override must beat utilities */
     transition-duration: 200ms !important;
+  }
+  .reveal {
+    animation-name: fade-only;
+    animation-delay: 0ms;
   }
   .skeleton {
     /* biome-ignore lint/complexity/noImportantStyles: shimmer must fully disable under reduced motion */
