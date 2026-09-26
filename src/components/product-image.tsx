@@ -23,6 +23,12 @@ export function ProductImage({
   className,
 }: ProductImageProps): React.JSX.Element {
   const [failed, setFailed] = useState(false);
+  const [prevSrc, setPrevSrc] = useState(src);
+  // Reset the broken flag when the source changes (render-time adjustment).
+  if (prevSrc !== src) {
+    setPrevSrc(src);
+    setFailed(false);
+  }
   const resolved = failed || !src ? fallbackSrc(seed) : src;
   return (
     <Image

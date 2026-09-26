@@ -81,3 +81,4 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - app-state: `src/store/` six split providers (17-check sanity on pure transitions).
 - product-listing: `/` toolbar + cards/table + pagination + combine/total rules (SSR smoke ok).
 - product-details: `/products/[id]` SSR prefetch + locals-first + gallery (smoke: valid/invalid/temp ok).
+- product-add: `/products/new` gated form, blur+submit validation, temp merge (22-check sanity, gate smoke ok).
