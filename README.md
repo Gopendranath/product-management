@@ -64,6 +64,14 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - Toasts keyed by action, max 3, single toast per failure. api-client never toasts.
 - Cross-tab favs/auth: last-write-wins, no live sync.
 
+## Performance
+
+- Debounced search (300ms, last-wins) cuts API calls while typing.
+- `next/image` lazy + `sizes` everywhere; `priority` only on the details main image; user URLs unoptimized + placeholder fallback.
+- Memoized `ProductCard`/`ProductRow`; server pagination caps the DOM at 12 items; layout-matching skeletons prevent CLS.
+- Lighthouse desktop (prod build, local): performance 100, accessibility 100, best-practices 100, SEO 100. LCP 0.6s, CLS 0.009, TBT 30ms.
+- Browser QA (headless Chromium, prod build): listing search/category/sort/pagination, details gallery + category overwrite + Back, add gate + invalid + broken-thumbnail + success merge, empty + Reset, offline error + Retry, theme/fav persist across reload, 360/768/1440 viewports, axe 0 violations on listing/details/add, zero console errors.
+
 ## Assumptions and limits
 
 - DummyJSON POST is mock and does not persist; reload loses local adds (accepted demo behavior).

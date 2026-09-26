@@ -5,8 +5,8 @@ import {
   ThemeProvider as NextThemesProvider,
   useTheme as useNextTheme,
 } from "next-themes";
-import { createContext, useContext, useMemo } from "react";
 import { STORAGE_KEYS } from "@/store/constants";
+import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 
 interface ThemeContextValue {
   /** Resolved mode. SSR + first paint fall back to light, then system. */
@@ -22,16 +22,34 @@ function ThemeBridge({
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
-  const { resolvedTheme, setTheme } = useNextTheme();
-  const theme: ThemeMode = resolvedTheme === "dark" ? "dark" : "light";
+  const { theme, setTheme } = useNextTheme();
+  const resolved: ThemeMode = theme === "dark" ? "dark" : "light";
+  const appliedSystem = useRef(false);
+
+  // LLD rule: SSR + first paint are light; the client applies the system
+  // preference only when nothing is stored. Stored values win untouched.
+  useEffect(() => {
+    if (appliedSystem.current) return;
+    appliedSystem.current = true;
+    try {
+      if (
+        window.localStorage.getItem(STORAGE_KEYS.theme) === null &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      ) {
+        setTheme("dark");
+      }
+    } catch {
+      // Storage or matchMedia unavailable: stay light.
+    }
+  }, [setTheme]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({
-      theme,
+      theme: resolved,
       setTheme: (mode: ThemeMode) => setTheme(mode),
-      toggleTheme: () => setTheme(theme === "dark" ? "light" : "dark"),
+      toggleTheme: () => setTheme(resolved === "dark" ? "light" : "dark"),
     }),
-    [theme, setTheme],
+    [resolved, setTheme],
   );
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
@@ -40,7 +58,8 @@ function ThemeBridge({
 
 /**
  * Hydration-safe theme. next-themes owns the document class + persistence
- * (key theme-v1); SSR renders light and the client applies stored/system mode.
+ * (key theme-v1) with an explicit light default; the bridge applies the
+ * system preference once when nothing is stored.
  */
 export function AppThemeProvider({
   children,
@@ -51,8 +70,8 @@ export function AppThemeProvider({
     <NextThemesProvider
       attribute="class"
       storageKey={STORAGE_KEYS.theme}
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
       disableTransitionOnChange
     >
       <ThemeBridge>{children}</ThemeBridge>
