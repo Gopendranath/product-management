@@ -1,15 +1,19 @@
 "use client";
 
+import { STORAGE_KEYS } from "@/store/constants";
+import { isThemeMode, saveJson } from "@/store/storage";
 import type { ThemeMode } from "@/types/store";
 import {
-  ThemeProvider as NextThemesProvider,
-  useTheme as useNextTheme,
-} from "next-themes";
-import { STORAGE_KEYS } from "@/store/constants";
-import { createContext, useContext, useEffect, useMemo, useRef } from "react";
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface ThemeContextValue {
-  /** Resolved mode. SSR + first paint fall back to light, then system. */
+  /** Resolved mode. SSR + first paint fall back to light, then stored/system. */
   theme: ThemeMode;
   setTheme: (mode: ThemeMode) => void;
   toggleTheme: () => void;
@@ -17,65 +21,62 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function ThemeBridge({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.JSX.Element {
-  const { theme, setTheme } = useNextTheme();
-  const resolved: ThemeMode = theme === "dark" ? "dark" : "light";
-  const appliedSystem = useRef(false);
+function applyMode(mode: ThemeMode): void {
+  document.documentElement.classList.toggle("dark", mode === "dark");
+  document.documentElement.style.colorScheme = mode;
+}
 
-  // LLD rule: SSR + first paint are light; the client applies the system
-  // preference only when nothing is stored. Stored values win untouched.
-  useEffect(() => {
-    if (appliedSystem.current) return;
-    appliedSystem.current = true;
-    try {
-      if (
-        window.localStorage.getItem(STORAGE_KEYS.theme) === null &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
-        setTheme("dark");
-      }
-    } catch {
-      // Storage or matchMedia unavailable: stay light.
-    }
-  }, [setTheme]);
-
-  const value = useMemo<ThemeContextValue>(
-    () => ({
-      theme: resolved,
-      setTheme: (mode: ThemeMode) => setTheme(mode),
-      toggleTheme: () => setTheme(resolved === "dark" ? "light" : "dark"),
-    }),
-    [resolved, setTheme],
-  );
-  return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-  );
+function readStoredTheme(): ThemeMode | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(STORAGE_KEYS.theme);
+    if (raw === null) return null;
+    const parsed: unknown = JSON.parse(raw);
+    return isThemeMode(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
- * Hydration-safe theme. next-themes owns the document class + persistence
- * (key theme-v1) with an explicit light default; the bridge applies the
- * system preference once when nothing is stored.
+ * Hydration-safe theme. State starts light (matching SSR); stored or system
+ * mode applies post-mount. A blocking head script in the root layout paints
+ * the right mode even earlier. Class strategy, key theme-v1.
  */
 export function AppThemeProvider({
   children,
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
+  const [theme, setThemeState] = useState<ThemeMode>("light");
+
+  useEffect(() => {
+    const stored = readStoredTheme();
+    const initial =
+      stored ??
+      (window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light");
+    setThemeState(initial);
+    applyMode(initial);
+  }, []);
+
+  const setTheme = useCallback((mode: ThemeMode) => {
+    setThemeState(mode);
+    applyMode(mode);
+    saveJson(STORAGE_KEYS.theme, mode);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [setTheme, theme]);
+
+  const value = useMemo<ThemeContextValue>(
+    () => ({ theme, setTheme, toggleTheme }),
+    [theme, setTheme, toggleTheme],
+  );
   return (
-    <NextThemesProvider
-      attribute="class"
-      storageKey={STORAGE_KEYS.theme}
-      defaultTheme="light"
-      enableSystem={false}
-      disableTransitionOnChange
-    >
-      <ThemeBridge>{children}</ThemeBridge>
-    </NextThemesProvider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 

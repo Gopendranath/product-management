@@ -166,6 +166,12 @@ function MobileMenu({ pathname }: { pathname: string }): React.JSX.Element {
 /** 64px sticky translucent bar. Single-line desktop, hamburger below lg. */
 export function SiteHeader(): React.JSX.Element {
   const pathname = usePathname();
+  // Personalized controls render post-mount so the first client render
+  // matches SSR (stored theme/auth would otherwise mismatch hydration).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   return (
     <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
       <div className="container-app flex h-16 items-center justify-between gap-4 px-4">
@@ -195,10 +201,22 @@ export function SiteHeader(): React.JSX.Element {
           ))}
         </nav>
         <div className="flex items-center gap-1">
-          <ThemeToggle />
-          <div className="hidden lg:block">
-            <AuthButton />
-          </div>
+          {mounted ? (
+            <>
+              <ThemeToggle />
+              <div className="hidden lg:block">
+                <AuthButton />
+              </div>
+            </>
+          ) : (
+            <>
+              <span aria-hidden className="min-h-[44px] min-w-[44px]" />
+              <span
+                aria-hidden
+                className="hidden min-h-[44px] min-w-20 lg:block"
+              />
+            </>
+          )}
           <MobileMenu pathname={pathname} />
         </div>
       </div>

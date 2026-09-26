@@ -14,7 +14,8 @@
 }
 
 /*
- * DESIGN.md tokens — single strategy: CSS vars + dark: class via next-themes
+ * DESIGN.md tokens — single strategy: CSS vars + dark: class (custom engine:
+ * blocking head script + context; same .dark contract, key theme-v1).
  * ([data-theme="dark"] also honored; both selectors map to the same dark set).
  *
  * Breakpoints (Tailwind defaults, locked): sm 640 / md 768 / lg 1024 / xl 1280.

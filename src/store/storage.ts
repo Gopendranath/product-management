@@ -39,3 +39,7 @@ export function isNumberArray(value: unknown): value is number[] {
 export function isBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
 }
+
+export function isThemeMode(value: unknown): value is "light" | "dark" {
+  return value === "light" || value === "dark";
+}

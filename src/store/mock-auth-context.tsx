@@ -6,6 +6,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -24,9 +25,12 @@ export function MockAuthProvider({
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
-  const [loggedIn, setLoggedIn] = useState<boolean>(() =>
-    loadJson(STORAGE_KEYS.auth, false, isBoolean),
-  );
+  // Deferred storage read: SSR + first client render use false so hydration matches.
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoggedIn(loadJson(STORAGE_KEYS.auth, false, isBoolean));
+  }, []);
 
   const persist = useCallback((value: boolean) => {
     setLoggedIn(value);

@@ -26,11 +26,18 @@ export function FavsProvider({
   children: React.ReactNode;
 }): React.JSX.Element {
   const { pushToast } = useToasts();
-  const [favIds, setFavIds] = useState<number[]>(() =>
-    loadJson(STORAGE_KEYS.favs, [], isNumberArray),
-  );
+  // Deferred storage read: SSR + first client render use [], the stored
+  // value loads post-mount so hydration matches.
+  const [favIds, setFavIds] = useState<number[]>([]);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setFavIds(loadJson(STORAGE_KEYS.favs, [], isNumberArray));
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     const saved = saveJson(STORAGE_KEYS.favs, favIds);
     if (!saved) {
       pushToast(
@@ -39,7 +46,7 @@ export function FavsProvider({
         "Favourites kept for this session only.",
       );
     }
-  }, [favIds, pushToast]);
+  }, [favIds, hydrated, pushToast]);
 
   const isFav = useCallback((id: number) => favIds.includes(id), [favIds]);
 

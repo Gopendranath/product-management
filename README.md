@@ -33,7 +33,7 @@ Verify before claiming done: `pnpm typecheck && pnpm lint && pnpm build`.
 
 - Next.js App Router + TypeScript strict (`noUncheckedIndexedAccess`, no `any`). SSR listing/details for first paint; client controls for filters.
 - Tailwind v4 + Shadcn/UI primitives (`src/components/ui`). Tokens in `src/app/globals.css`.
-- State: split Context providers (`src/store`): filters, favs, theme, toasts, local products, mock auth. No mega-store.
+- State: split Context providers (`src/store`): filters, favs, theme, toasts, local products, mock auth. No mega-store. Theme: blocking head script + context (`.dark`, key `theme-v1`).
 - API: single-axis `src/services` client over `https://dummyjson.com/products` (`q` wins, else category, else base). Listing owns combine + display-total rule.
 - Motion: CSS transitions default; springs (`motion` package) isolated to drawer/modal/sheet.
 - Icons: `@phosphor-icons/react` only, stroke 1.5. Fonts: Geist + Geist Mono via `next/font`.
