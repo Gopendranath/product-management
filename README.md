@@ -62,6 +62,7 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - Favs + theme + mock-auth persist (`favs-v1`, `theme-v1`, `auth-mock-v1`) with parse guards. SSR starts light, client applies system theme.
 - Local adds: mock POST id ignored, temp `-Date.now()` assigned, memory only. Visible per display-total rule (server total + locals on page-1 default view).
 - Toasts keyed by action, max 3, single toast per failure. api-client never toasts.
+- Cross-tab favs/auth: last-write-wins, no live sync.
 
 ## Assumptions and limits
 
@@ -77,3 +78,4 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - Setup + tooling: scaffold pass.
 - Design tokens: `globals.css` token pass (palette, semantics, radius, ease, z, focus, shimmer, reduced-motion).
 - api-client: `src/types/` + `src/services/client.ts` (single-axis, typed errors, 21-check sanity).
+- app-state: `src/store/` six split providers (17-check sanity on pure transitions).
