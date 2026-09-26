@@ -1,30 +1,16 @@
 "use client";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { ListingTableHead } from "@/components/listing-table-head";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { PAGE_SIZE } from "@/store/constants";
 
 const SKELETON_KEYS = Array.from(
   { length: PAGE_SIZE },
   (_, index) => `skeleton-${index}`,
 );
-const SKELETON_COLUMNS = [
-  "image",
-  "name",
-  "category",
-  "price",
-  "stock",
-  "rating",
-  "actions",
-];
+const SKELETON_CELL_COUNT = 7;
 
 /** Layout-matching skeletons: cards <md, table rows >=md. */
 export function ListingSkeletons(): React.JSX.Element {
@@ -50,22 +36,13 @@ export function ListingSkeletons(): React.JSX.Element {
       </div>
       <div className="hidden md:block" aria-hidden>
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead scope="col">Image</TableHead>
-              <TableHead scope="col">Name</TableHead>
-              <TableHead scope="col">Category</TableHead>
-              <TableHead scope="col">Price</TableHead>
-              <TableHead scope="col">Stock</TableHead>
-              <TableHead scope="col">Rating</TableHead>
-              <TableHead scope="col">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListingTableHead />
           <TableBody>
             {SKELETON_KEYS.map((key) => (
               <TableRow key={key}>
-                {SKELETON_COLUMNS.map((column) => (
-                  <TableCell key={`${key}-cell-${column}`}>
+                {Array.from({ length: SKELETON_CELL_COUNT }, (_, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton order never changes
+                  <TableCell key={`${key}-cell-${index}`}>
                     <Skeleton className="skeleton h-5 w-full" />
                   </TableCell>
                 ))}

@@ -1,9 +1,5 @@
 /** Image helpers. API-first, picsum fallback, user URLs unoptimized. */
 
-export function isLocalId(id: number): boolean {
-  return id < 0;
-}
-
 export function fallbackSrc(id: number | string): string {
   return `https://picsum.photos/seed/product-${id}/600/450`;
 }

@@ -209,13 +209,11 @@ export function SiteHeader(): React.JSX.Element {
               </div>
             </>
           ) : (
-            <>
-              <span aria-hidden className="min-h-[44px] min-w-[44px]" />
-              <span
-                aria-hidden
-                className="hidden min-h-[44px] min-w-20 lg:block"
-              />
-            </>
+            // Size-matched reserve: prevents header CLS between SSR and mount.
+            <div aria-hidden className="flex items-center gap-1">
+              <span className="min-h-[44px] min-w-[44px]" />
+              <span className="hidden min-h-[44px] min-w-20 lg:block" />
+            </div>
           )}
           <MobileMenu pathname={pathname} />
         </div>

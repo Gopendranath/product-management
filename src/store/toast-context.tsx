@@ -6,6 +6,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -42,6 +43,14 @@ export function ToastProvider({
 }): React.JSX.Element {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const counter = useRef(0);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    const pending = timers.current;
+    return () => {
+      for (const timer of pending) clearTimeout(timer);
+    };
+  }, []);
 
   const dismissToast = useCallback((id: string) => {
     setToasts((previous) => previous.filter((toast) => toast.id !== id));
@@ -58,7 +67,8 @@ export function ToastProvider({
         message,
       };
       setToasts((previous) => enqueueToast(previous, toast));
-      setTimeout(() => dismissToast(toast.id), TOAST_DURATION_MS);
+      const timer = setTimeout(() => dismissToast(toast.id), TOAST_DURATION_MS);
+      timers.current.push(timer);
       return toast.id;
     },
     [dismissToast],

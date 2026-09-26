@@ -2,7 +2,7 @@
 
 import { ProductAddForm } from "@/components/product-add-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FALLBACK_CATEGORIES, listCategories } from "@/services/client";
+import { useCategories } from "@/hooks/use-categories";
 import { useMockAuth } from "@/store/mock-auth-context";
 import { useToasts } from "@/store/toast-context";
 import { useRouter } from "next/navigation";
@@ -17,22 +17,10 @@ export default function ProductAddPage(): React.JSX.Element {
   const { loggedIn } = useMockAuth();
   const { pushToast } = useToasts();
   const [mounted, setMounted] = useState(false);
-  const [categories, setCategories] = useState<string[]>([
-    ...FALLBACK_CATEGORIES,
-  ]);
+  const categories = useCategories();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    listCategories().then((list) => {
-      if (!cancelled) setCategories(list);
-    });
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {

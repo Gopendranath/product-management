@@ -1,6 +1,7 @@
 "use client";
 
-import { STOCK_BADGE_CLASS } from "@/components/product-card";
+import { STOCK_BADGE_CLASS } from "@/utils/format";
+import { useSafeBack } from "@/hooks/use-safe-back";
 import { ProductImage } from "@/components/product-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ import {
 import { ArrowLeft, Heart, Star } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Status = "loading" | "ready" | "empty";
 
@@ -41,6 +42,7 @@ export function ProductDetailsView({
   serverProduct,
 }: ProductDetailsViewProps): React.JSX.Element {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { pushToast } = useToasts();
   const { favIds, toggleFav } = useFavs();
   const { localProducts } = useLocalProducts();
@@ -53,33 +55,27 @@ export function ProductDetailsView({
   const [selectedImage, setSelectedImage] = useState(0);
   const [retryToken, setRetryToken] = useState(0);
   const resolvedRef = useRef(serverProduct !== null);
-  const backRef = useRef<HTMLAnchorElement>(null);
 
-  useEffect(() => {
-    backRef.current?.focus();
-  }, []);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: retryToken intentionally retriggers refetch
-  useEffect(() => {
+  const loadProduct = useCallback(() => {
     if (
       resolvedRef.current ||
       serverProduct ||
       idKind === "invalid" ||
       numericId === null
     )
-      return;
+      return undefined;
     const local = localProducts.find((item) => item.id === numericId);
     if (local) {
       resolvedRef.current = true;
       setProduct(local);
       setStatus("ready");
-      return;
+      return undefined;
     }
     // Temp ids live in memory only; missing means gone.
     if (idKind === "temp") {
       resolvedRef.current = true;
       setStatus("empty");
-      return;
+      return undefined;
     }
     let cancelled = false;
     setStatus("loading");
@@ -102,12 +98,16 @@ export function ProductDetailsView({
     return () => {
       cancelled = true;
     };
-  }, [serverProduct, idKind, numericId, localProducts, retryToken, pushToast]);
+  }, [serverProduct, idKind, numericId, localProducts, pushToast]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: retryToken intentionally retriggers reload
+  useEffect(() => {
+    loadProduct();
+  }, [loadProduct, retryToken]);
 
   const handleBack = (event: React.MouseEvent<HTMLAnchorElement>): void => {
     event.preventDefault();
-    if (window.history.length > 1) router.back();
-    else router.push("/");
+    goBack();
   };
 
   const handleCategory = (
@@ -127,7 +127,7 @@ export function ProductDetailsView({
     setRetryToken((token) => token + 1);
   };
 
-  if (status === "loading" || (status === "ready" && !product)) {
+  if (status === "loading") {
     return (
       <main className="container-app flex w-full flex-col gap-6 px-4 py-8">
         <Skeleton className="skeleton h-11 w-24" />
@@ -148,7 +148,6 @@ export function ProductDetailsView({
     return (
       <main className="container-app flex w-full flex-col items-start gap-4 px-4 py-8">
         <Link
-          ref={backRef}
           href="/"
           onClick={handleBack}
           className="inline-flex min-h-[44px] items-center gap-2 rounded-sm px-2 text-sm font-medium"
@@ -194,7 +193,6 @@ export function ProductDetailsView({
   return (
     <main className="container-app flex w-full flex-col gap-6 px-4 py-8">
       <Link
-        ref={backRef}
         href="/"
         onClick={handleBack}
         className="inline-flex min-h-[44px] w-fit items-center gap-2 rounded-sm px-2 text-sm font-medium"

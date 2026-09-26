@@ -2,23 +2,15 @@
 
 import { ListingEmpty, ListingError } from "@/components/listing-states";
 import { ListingSkeletons } from "@/components/listing-skeletons";
+import { ListingTableHead } from "@/components/listing-table-head";
 import { ListingToolbar } from "@/components/listing-toolbar";
 import { PaginationControls } from "@/components/pagination-controls";
 import { ProductCard } from "@/components/product-card";
 import { ProductRow } from "@/components/product-row";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody } from "@/components/ui/table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import {
-  FALLBACK_CATEGORIES,
-  fetchProducts,
-  listCategories,
-} from "@/services/client";
+import { useCategories } from "@/hooks/use-categories";
+import { fetchProducts } from "@/services/client";
 import { PAGE_SIZE } from "@/store/constants";
 import { useFavs } from "@/store/favs-context";
 import { useFilters } from "@/store/filter-context";
@@ -27,8 +19,8 @@ import { useToasts } from "@/store/toast-context";
 import { ApiError } from "@/types/api-error";
 import type { Product } from "@/types/product";
 import type { SortBy, SortOrder } from "@/types/store";
-import { compareProducts } from "@/utils/format";
-import { useEffect, useRef, useState } from "react";
+import { compareProducts, revealDelay } from "@/utils/format";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Status = "loading" | "ready" | "error";
 
@@ -50,32 +42,37 @@ function isDefaultView(
 
 export default function ListingPage(): React.JSX.Element {
   const { filters, setFilter, resetFilters } = useFilters();
-  const { favIds, toggleFav } = useFavs();
+  const { isFav, toggleFav } = useFavs();
   const { localProducts } = useLocalProducts();
   const { pushToast } = useToasts();
   const debouncedSearch = useDebouncedValue(filters.search, 300);
 
   const [items, setItems] = useState<Product[]>([]);
   const [serverTotal, setServerTotal] = useState(0);
-  const [categories, setCategories] = useState<string[]>([
-    ...FALLBACK_CATEGORIES,
-  ]);
+  const categories = useCategories();
   const [status, setStatus] = useState<Status>("loading");
   const [retryToken, setRetryToken] = useState(0);
   const requestRef = useRef(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    listCategories().then((list) => {
-      if (!cancelled) setCategories(list);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const defaultView = useMemo(
+    () =>
+      isDefaultView(
+        debouncedSearch,
+        filters.category,
+        filters.sortBy,
+        filters.order,
+        filters.page,
+      ),
+    [
+      debouncedSearch,
+      filters.category,
+      filters.sortBy,
+      filters.order,
+      filters.page,
+    ],
+  );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: retryToken intentionally retriggers refetch
-  useEffect(() => {
+  const refetch = useCallback(() => {
     requestRef.current += 1;
     const request = requestRef.current;
     setStatus("loading");
@@ -99,16 +96,9 @@ export default function ListingPage(): React.JSX.Element {
           );
         }
         combined.sort(compareProducts(filters.sortBy, filters.order));
-        const qualifying =
-          localProducts.length > 0 &&
-          isDefaultView(
-            debouncedSearch,
-            filters.category,
-            filters.sortBy,
-            filters.order,
-            filters.page,
-          );
-        if (qualifying) combined = [...localProducts, ...combined];
+        if (localProducts.length > 0 && defaultView) {
+          combined = [...localProducts, ...combined];
+        }
         setItems(combined);
         setServerTotal(page.total);
         setStatus("ready");
@@ -135,19 +125,17 @@ export default function ListingPage(): React.JSX.Element {
     debouncedSearch,
     filters,
     localProducts,
-    retryToken,
+    defaultView,
     pushToast,
     setFilter,
   ]);
 
-  const qualifying = isDefaultView(
-    debouncedSearch,
-    filters.category,
-    filters.sortBy,
-    filters.order,
-    filters.page,
-  );
-  const displayTotal = qualifying
+  // biome-ignore lint/correctness/useExhaustiveDependencies: retryToken intentionally retriggers refetch
+  useEffect(() => {
+    refetch();
+  }, [refetch, retryToken]);
+
+  const displayTotal = defaultView
     ? serverTotal + localProducts.length
     : serverTotal;
   const totalPages = Math.ceil(displayTotal / PAGE_SIZE);
@@ -195,13 +183,13 @@ export default function ListingPage(): React.JSX.Element {
                   className="reveal h-full"
                   style={
                     {
-                      "--reveal-delay": `${Math.min(index * 60, 600)}ms`,
+                      "--reveal-delay": revealDelay(index),
                     } as React.CSSProperties
                   }
                 >
                   <ProductCard
                     product={product}
-                    isFav={favIds.includes(product.id)}
+                    isFav={isFav(product.id)}
                     onToggleFav={toggleFav}
                   />
                 </div>
@@ -209,24 +197,14 @@ export default function ListingPage(): React.JSX.Element {
             </div>
             <div className="hidden md:block">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead scope="col">Image</TableHead>
-                    <TableHead scope="col">Name</TableHead>
-                    <TableHead scope="col">Category</TableHead>
-                    <TableHead scope="col">Price</TableHead>
-                    <TableHead scope="col">Stock</TableHead>
-                    <TableHead scope="col">Rating</TableHead>
-                    <TableHead scope="col">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
+                <ListingTableHead />
                 <TableBody>
                   {items.map((product, index) => (
                     <ProductRow
                       key={product.id}
                       index={index}
                       product={product}
-                      isFav={favIds.includes(product.id)}
+                      isFav={isFav(product.id)}
                       onToggleFav={toggleFav}
                     />
                   ))}

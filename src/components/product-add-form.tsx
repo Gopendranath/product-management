@@ -38,8 +38,9 @@ import {
   type AddFormErrors,
   type AddFormValues,
 } from "@/utils/validate-product";
+import { useSafeBack } from "@/hooks/use-safe-back";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 function FieldError({
   id,
@@ -56,12 +57,15 @@ function FieldError({
   );
 }
 
+interface ProductAddFormProps {
+  categories: string[];
+}
+
 export function ProductAddForm({
   categories,
-}: {
-  categories: string[];
-}): React.JSX.Element {
+}: ProductAddFormProps): React.JSX.Element {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { pushToast } = useToasts();
   const { addLocal } = useLocalProducts();
   const { resetFilters } = useFilters();
@@ -82,9 +86,12 @@ export function ProductAddForm({
   });
 
   const dirty = ADD_FIELD_ORDER.some((key) => values[key] !== "");
-  const thumbnailValid =
-    values.thumbnail.trim() !== "" &&
-    !validateAddField("thumbnail", values, categories);
+  const thumbnailValid = useMemo(
+    () =>
+      values.thumbnail.trim() !== "" &&
+      !validateAddField("thumbnail", values, categories),
+    [values, categories],
+  );
   const thumbnailError = errors.thumbnail;
 
   const setValue = (key: AddFieldKey, value: string): void => {
@@ -111,8 +118,7 @@ export function ProductAddForm({
 
   const handleCancel = (confirmed: boolean): void => {
     if (!confirmed) return;
-    if (window.history.length > 1) router.back();
-    else router.push("/");
+    goBack();
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {

@@ -1,15 +1,14 @@
 "use client";
 
+import { useSafeBack } from "@/hooks/use-safe-back";
 import { ArrowLeft, Package } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function NotFound(): React.JSX.Element {
-  const router = useRouter();
+  const goBack = useSafeBack();
   const handleBack = (event: React.MouseEvent<HTMLAnchorElement>): void => {
     event.preventDefault();
-    if (window.history.length > 1) router.back();
-    else router.push("/");
+    goBack();
   };
   return (
     <main className="container-app flex w-full flex-col items-center gap-3 px-4 py-16 text-center">

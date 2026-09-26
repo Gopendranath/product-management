@@ -12,8 +12,8 @@ import type {
   Product,
 } from "@/types/product";
 
-export const API_BASE_URL = "https://dummyjson.com/products";
-export const REQUEST_TIMEOUT_MS = 8000;
+const API_BASE_URL = "https://dummyjson.com/products";
+const REQUEST_TIMEOUT_MS = 8000;
 
 /** Static fallback when the categories endpoint fails. */
 export const FALLBACK_CATEGORIES: readonly string[] = [
@@ -66,13 +66,13 @@ function buildPageParams(params: PageParams): URLSearchParams {
   return search;
 }
 
-interface RequestInit {
+interface FetchJsonInit {
   params?: URLSearchParams;
   method?: string;
   body?: unknown;
 }
 
-async function fetchJson(path: string, init?: RequestInit): Promise<unknown> {
+async function fetchJson(path: string, init?: FetchJsonInit): Promise<unknown> {
   const query = init?.params ? `?${init.params.toString()}` : "";
   const url = `${API_BASE_URL}${path}${query}`;
   const controller = new AbortController();
@@ -205,11 +205,7 @@ export function normalizeCategories(input: unknown): string[] {
 export async function listCategories(): Promise<string[]> {
   try {
     return normalizeCategories(await fetchJson("/categories"));
-  } catch (error) {
-    console.warn(
-      "listCategories failed, using fallback:",
-      error instanceof Error ? error.message : error,
-    );
+  } catch {
     return [...FALLBACK_CATEGORIES];
   }
 }

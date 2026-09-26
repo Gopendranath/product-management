@@ -9,6 +9,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -30,6 +31,8 @@ export function FavsProvider({
   // value loads post-mount so hydration matches.
   const [favIds, setFavIds] = useState<number[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const latest = useRef<number[]>([]);
+  latest.current = favIds;
 
   useEffect(() => {
     setFavIds(loadJson(STORAGE_KEYS.favs, [], isNumberArray));
@@ -48,20 +51,17 @@ export function FavsProvider({
     }
   }, [favIds, hydrated, pushToast]);
 
-  const isFav = useCallback((id: number) => favIds.includes(id), [favIds]);
+  const isFav = useCallback((id: number) => latest.current.includes(id), []);
 
-  const toggleFav = useCallback(
-    (id: number): boolean => {
-      const added = !favIds.includes(id);
-      setFavIds((previous) =>
-        previous.includes(id)
-          ? previous.filter((favId) => favId !== id)
-          : [...previous, id],
-      );
-      return added;
-    },
-    [favIds],
-  );
+  const toggleFav = useCallback((id: number): boolean => {
+    const added = !latest.current.includes(id);
+    setFavIds((previous) =>
+      previous.includes(id)
+        ? previous.filter((favId) => favId !== id)
+        : [...previous, id],
+    );
+    return added;
+  }, []);
 
   const value = useMemo(
     () => ({ favIds, isFav, toggleFav }),

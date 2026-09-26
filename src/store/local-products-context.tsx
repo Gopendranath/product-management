@@ -35,35 +35,35 @@ export function LocalProductsProvider({
   const [localProducts, setLocalProducts] = useState<Product[]>([]);
   // Monotonic guard: same-tick double adds must not share an id.
   const lastIdRef = useRef(0);
+  const idsRef = useRef<Set<number>>(new Set());
+  idsRef.current = new Set(localProducts.map((product) => product.id));
 
-  const addLocal = useCallback(
-    (data: AddProductPayload): number => {
-      const candidate = nextTempId(localProducts.map((product) => product.id));
-      const assigned =
-        lastIdRef.current === 0
-          ? candidate
-          : Math.min(candidate, lastIdRef.current - 1);
-      lastIdRef.current = assigned;
-      const thumbnail =
-        data.thumbnail ??
-        `https://picsum.photos/seed/product-${assigned}/600/450`;
-      const product: Product = {
-        ...data,
-        id: assigned,
-        rating: 0,
-        discountPercentage: 0,
-        thumbnail,
-        images: [thumbnail],
-      };
-      setLocalProducts((previous) =>
-        previous.some((item) => item.id === assigned)
-          ? previous
-          : [product, ...previous],
-      );
-      return assigned;
-    },
-    [localProducts],
-  );
+  const addLocal = useCallback((data: AddProductPayload): number => {
+    const candidate = nextTempId([...idsRef.current]);
+    const assigned =
+      lastIdRef.current === 0
+        ? candidate
+        : Math.min(candidate, lastIdRef.current - 1);
+    lastIdRef.current = assigned;
+    idsRef.current.add(assigned);
+    const thumbnail =
+      data.thumbnail ??
+      `https://picsum.photos/seed/product-${assigned}/600/450`;
+    const product: Product = {
+      ...data,
+      id: assigned,
+      rating: 0,
+      discountPercentage: 0,
+      thumbnail,
+      images: [thumbnail],
+    };
+    setLocalProducts((previous) =>
+      previous.some((item) => item.id === assigned)
+        ? previous
+        : [product, ...previous],
+    );
+    return assigned;
+  }, []);
 
   const value = useMemo(
     () => ({ localProducts, addLocal }),

@@ -1,7 +1,7 @@
 "use client";
 
 import { STORAGE_KEYS } from "@/store/constants";
-import { isThemeMode, saveJson } from "@/store/storage";
+import { isThemeMode, loadJson, saveJson } from "@/store/storage";
 import type { ThemeMode } from "@/types/store";
 import {
   createContext,
@@ -9,6 +9,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -27,15 +28,12 @@ function applyMode(mode: ThemeMode): void {
 }
 
 function readStoredTheme(): ThemeMode | null {
-  try {
-    if (typeof window === "undefined") return null;
-    const raw = window.localStorage.getItem(STORAGE_KEYS.theme);
-    if (raw === null) return null;
-    const parsed: unknown = JSON.parse(raw);
-    return isThemeMode(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
+  if (typeof window === "undefined") return null;
+  return loadJson<ThemeMode | null>(
+    STORAGE_KEYS.theme,
+    null,
+    isThemeMode as (value: unknown) => value is ThemeMode | null,
+  );
 }
 
 /**
@@ -49,6 +47,8 @@ export function AppThemeProvider({
   children: React.ReactNode;
 }): React.JSX.Element {
   const [theme, setThemeState] = useState<ThemeMode>("light");
+  const latest = useRef<ThemeMode>("light");
+  latest.current = theme;
 
   useEffect(() => {
     const stored = readStoredTheme();
@@ -64,12 +64,15 @@ export function AppThemeProvider({
   const setTheme = useCallback((mode: ThemeMode) => {
     setThemeState(mode);
     applyMode(mode);
+    // Silent on quota failure: ToastProvider sits inside ThemeProvider so no
+    // toast here; next load falls back to system. Favs (inside ToastProvider)
+    // toasts instead. Same saveJson contract, different layer.
     saveJson(STORAGE_KEYS.theme, mode);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  }, [setTheme, theme]);
+    setTheme(latest.current === "dark" ? "light" : "dark");
+  }, [setTheme]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({ theme, setTheme, toggleTheme }),

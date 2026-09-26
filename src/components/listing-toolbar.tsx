@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { FilterState, SortBy, SortOrder } from "@/types/store";
+import { isSortBy, isSortOrder } from "@/store/filter-context";
 import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import Link from "next/link";
 
@@ -107,8 +108,7 @@ export function ListingToolbar({
           <Select
             value={filters.sortBy}
             onValueChange={(value) => {
-              if (value === "id" || value === "price" || value === "rating")
-                onSort(value, filters.order);
+              if (isSortBy(value)) onSort(value, filters.order);
             }}
           >
             <SelectTrigger
@@ -134,8 +134,7 @@ export function ListingToolbar({
           <Select
             value={filters.order}
             onValueChange={(value) => {
-              if (value === "asc" || value === "desc")
-                onSort(filters.sortBy, value);
+              if (isSortOrder(value)) onSort(filters.sortBy, value);
             }}
           >
             <SelectTrigger

@@ -2,14 +2,15 @@
 
 import { Badge } from "@/components/ui/badge";
 import { FavButton } from "@/components/fav-button";
-import { STOCK_BADGE_CLASS } from "@/components/product-card";
 import { ProductImage } from "@/components/product-image";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { Product } from "@/types/product";
 import {
+  STOCK_BADGE_CLASS,
   STOCK_LABEL,
   formatPrice,
   formatRating,
+  revealDelay,
   stockStatus,
 } from "@/utils/format";
 import { Star } from "@phosphor-icons/react";
@@ -35,7 +36,7 @@ export const ProductRow = memo(function ProductRow({
       className="reveal"
       style={
         {
-          "--reveal-delay": `${Math.min(index * 60, 600)}ms`,
+          "--reveal-delay": revealDelay(index),
         } as React.CSSProperties
       }
     >

@@ -14,7 +14,7 @@ import type {
   SortOrder,
 } from "@/types/store";
 
-const DEFAULT_FILTERS: FilterState = {
+export const DEFAULT_FILTERS: FilterState = {
   search: "",
   category: "all",
   sortBy: "id",
@@ -29,11 +29,11 @@ const RESET_KEYS: readonly FilterResetKey[] = [
   "order",
 ];
 
-function isSortBy(value: unknown): value is SortBy {
+export function isSortBy(value: unknown): value is SortBy {
   return value === "price" || value === "rating" || value === "id";
 }
 
-function isSortOrder(value: unknown): value is SortOrder {
+export function isSortOrder(value: unknown): value is SortOrder {
   return value === "asc" || value === "desc";
 }
 
@@ -83,13 +83,7 @@ export function FilterProvider({
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   const setFilter = useCallback((partial: Partial<FilterState>) => {
-    setFilters((previous) => {
-      const next = reduceFilters(previous, partial);
-      if (next === previous) {
-        console.warn("setFilter ignored invalid update:", partial);
-      }
-      return next;
-    });
+    setFilters((previous) => reduceFilters(previous, partial));
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -111,5 +105,3 @@ export function useFilters(): FilterContextValue {
     throw new Error("useFilters must be used within FilterProvider");
   return context;
 }
-
-export { DEFAULT_FILTERS };

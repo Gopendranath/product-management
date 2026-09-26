@@ -1,4 +1,5 @@
 /** Listing view-model helpers. Pure. */
+import type { SortBy, SortOrder } from "@/types/store";
 
 export type StockStatus = "in-stock" | "low" | "out";
 
@@ -27,9 +28,19 @@ export const STOCK_LABEL: Record<StockStatus, string> = {
   out: "Out of stock",
 };
 
+export const STOCK_BADGE_CLASS: Record<StockStatus, string> = {
+  "in-stock": "bg-success text-success-text",
+  low: "bg-warn text-warn-text",
+  out: "bg-error text-error-text",
+};
+
+export function revealDelay(index: number): string {
+  return `${Math.min(index * 60, 600)}ms`;
+}
+
 export function compareProducts(
-  sortBy: "price" | "rating" | "id",
-  order: "asc" | "desc",
+  sortBy: SortBy,
+  order: SortOrder,
 ): (
   a: { price: number; rating: number; id: number },
   b: { price: number; rating: number; id: number },

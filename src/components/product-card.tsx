@@ -6,8 +6,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { FavButton } from "@/components/fav-button";
 import { ProductImage } from "@/components/product-image";
 import type { Product } from "@/types/product";
-import type { StockStatus } from "@/utils/format";
 import {
+  STOCK_BADGE_CLASS,
   STOCK_LABEL,
   formatPrice,
   formatRating,
@@ -17,11 +17,8 @@ import { Star } from "@phosphor-icons/react";
 import Link from "next/link";
 import { memo } from "react";
 
-export const STOCK_BADGE_CLASS: Record<StockStatus, string> = {
-  "in-stock": "bg-success text-success-text",
-  low: "bg-warn text-warn-text",
-  out: "bg-error text-error-text",
-};
+/** Kept here for existing imports; canonical home is utils/format. */
+export { STOCK_BADGE_CLASS } from "@/utils/format";
 
 interface ProductCardProps {
   product: Product;

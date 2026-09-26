@@ -21,7 +21,11 @@ export const metadata: Metadata = {
   description: "Browse, search, filter, and manage products.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
@@ -29,6 +33,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Theme bootstrap: mirrors store/theme-context readStoredTheme + applyMode.
+            Must stay inline static (pre-paint, pre-JS); update both together. */}
         <Script
           id="theme-init"
           strategy="beforeInteractive"

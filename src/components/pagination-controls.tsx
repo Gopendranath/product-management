@@ -1,14 +1,13 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
 } from "@/components/ui/pagination";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 interface PaginationControlsProps {
   page: number;
@@ -17,7 +16,7 @@ interface PaginationControlsProps {
   onChange: (page: number) => void;
 }
 
-/** Numbered window with prev/next. Buttons guard double-click via disabled. */
+/** Numbered window with prev/next. Real buttons with disabled guards. */
 export function PaginationControls({
   page,
   totalPages,
@@ -48,23 +47,23 @@ export function PaginationControls({
       onChange(target);
   };
 
+  const navDisabled = (atEdge: boolean): boolean => Boolean(disabled) || atEdge;
+
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious
-            href="#"
-            onClick={(event) => {
-              event.preventDefault();
-              go(page - 1);
-            }}
-            aria-disabled={disabled ?? page <= 1}
-            className={
-              (disabled ?? page <= 1)
-                ? "pointer-events-none min-h-[44px] opacity-50"
-                : "min-h-[44px]"
-            }
-          />
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => go(page - 1)}
+            disabled={navDisabled(page <= 1)}
+            aria-label="Go to previous page"
+            className="min-h-[44px] pl-1.5!"
+          >
+            <CaretLeft data-icon="inline-start" />
+            <span className="hidden sm:block">Previous</span>
+          </Button>
         </PaginationItem>
         {window.map((entry) =>
           typeof entry !== "number" ? (
@@ -73,39 +72,33 @@ export function PaginationControls({
             </PaginationItem>
           ) : (
             <PaginationItem key={entry}>
-              <PaginationLink
-                href="#"
-                isActive={entry === page}
-                onClick={(event) => {
-                  event.preventDefault();
-                  go(entry);
-                }}
-                aria-disabled={disabled}
-                className={
-                  disabled
-                    ? "pointer-events-none min-h-[44px] min-w-[44px] opacity-50"
-                    : "min-h-[44px] min-w-[44px]"
-                }
+              <Button
+                type="button"
+                variant={entry === page ? "outline" : "ghost"}
+                size="icon"
+                onClick={() => go(entry)}
+                disabled={disabled}
+                aria-current={entry === page ? "page" : undefined}
+                aria-label={`Go to page ${entry}`}
+                className="min-h-[44px] min-w-[44px]"
               >
                 {entry}
-              </PaginationLink>
+              </Button>
             </PaginationItem>
           ),
         )}
         <PaginationItem>
-          <PaginationNext
-            href="#"
-            onClick={(event) => {
-              event.preventDefault();
-              go(page + 1);
-            }}
-            aria-disabled={disabled ?? page >= totalPages}
-            className={
-              (disabled ?? page >= totalPages)
-                ? "pointer-events-none min-h-[44px] opacity-50"
-                : "min-h-[44px]"
-            }
-          />
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => go(page + 1)}
+            disabled={navDisabled(page >= totalPages)}
+            aria-label="Go to next page"
+            className="min-h-[44px] pr-1.5!"
+          >
+            <span className="hidden sm:block">Next</span>
+            <CaretRight data-icon="inline-end" />
+          </Button>
         </PaginationItem>
       </PaginationContent>
     </Pagination>

@@ -17,7 +17,6 @@ export function Toaster(): React.JSX.Element {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          role="status"
           className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border bg-surface px-4 py-3 text-ink shadow-lg"
         >
           {toast.kind === "success" ? (
