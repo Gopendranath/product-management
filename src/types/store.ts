@@ -4,6 +4,7 @@
 export type FilterResetKey = "search" | "category" | "sortBy" | "order";
 export type SortBy = "price" | "rating" | "id";
 export type SortOrder = "asc" | "desc";
+export type ViewMode = "cards" | "table";
 
 export interface FilterState {
   search: string;

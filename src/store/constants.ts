@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   favs: "favs-v1",
   theme: "theme-v1",
   auth: "auth-mock-v1",
+  view: "ui-view-v1",
 } as const;
 
 export const TOAST_DURATION_MS = 4000;

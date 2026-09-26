@@ -7,6 +7,7 @@ import { ListingToolbar } from "@/components/listing-toolbar";
 import { PaginationControls } from "@/components/pagination-controls";
 import { ProductCard } from "@/components/product-card";
 import { ProductRow } from "@/components/product-row";
+import { ViewToggle } from "@/components/view-toggle";
 import { Table, TableBody } from "@/components/ui/table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useCategories } from "@/hooks/use-categories";
@@ -41,7 +42,7 @@ function isDefaultView(
 }
 
 export default function ListingPage(): React.JSX.Element {
-  const { filters, setFilter, resetFilters } = useFilters();
+  const { filters, setFilter, resetFilters, view, setView } = useFilters();
   const { isFav, toggleFav } = useFavs();
   const { localProducts } = useLocalProducts();
   const { pushToast } = useToasts();
@@ -159,7 +160,7 @@ export default function ListingPage(): React.JSX.Element {
         onCategory={(category) => setFilter({ category })}
         onSort={(sortBy, order) => setFilter({ sortBy, order })}
       />
-      {status === "loading" && <ListingSkeletons />}
+      {status === "loading" && <ListingSkeletons view={view} />}
       {status === "error" && (
         <ListingError
           onRetry={() => {
@@ -173,44 +174,55 @@ export default function ListingPage(): React.JSX.Element {
           <ListingEmpty onClear={resetFilters} />
         ) : (
           <>
-            <p aria-live="polite" className="text-sm text-muted-foreground">
-              {displayTotal} {displayTotal === 1 ? "product" : "products"}
-            </p>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 md:hidden">
-              {items.map((product, index) => (
-                <div
-                  key={product.id}
-                  className="reveal h-full"
-                  style={
-                    {
-                      "--reveal-delay": revealDelay(index),
-                    } as React.CSSProperties
-                  }
-                >
-                  <ProductCard
-                    product={product}
-                    isFav={isFav(product.id)}
-                    onToggleFav={toggleFav}
-                  />
-                </div>
-              ))}
+            <div className="flex items-center justify-between gap-3">
+              <p aria-live="polite" className="text-sm text-muted-foreground">
+                {displayTotal} {displayTotal === 1 ? "product" : "products"}
+              </p>
+              <ViewToggle view={view} onChange={setView} />
             </div>
-            <div className="hidden md:block">
-              <Table>
-                <ListingTableHead />
-                <TableBody>
-                  {items.map((product, index) => (
-                    <ProductRow
-                      key={product.id}
-                      index={index}
+            {view === "cards" ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((product, index) => (
+                  <div
+                    key={product.id}
+                    className="reveal h-full"
+                    style={
+                      {
+                        "--reveal-delay": revealDelay(index),
+                      } as React.CSSProperties
+                    }
+                  >
+                    <ProductCard
                       product={product}
                       isFav={isFav(product.id)}
                       onToggleFav={toggleFav}
                     />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <section
+                className="overflow-x-auto rounded-lg border"
+                // biome-ignore lint/a11y/noNoninteractiveTabindex: scroll region keyboard access
+                tabIndex={0}
+                aria-label="Products table"
+              >
+                <Table className="min-w-[720px]">
+                  <ListingTableHead />
+                  <TableBody>
+                    {items.map((product, index) => (
+                      <ProductRow
+                        key={product.id}
+                        index={index}
+                        product={product}
+                        isFav={isFav(product.id)}
+                        onToggleFav={toggleFav}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </section>
+            )}
             <PaginationControls
               page={filters.page}
               totalPages={totalPages}

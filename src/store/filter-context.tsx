@@ -4,14 +4,18 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
+import { STORAGE_KEYS } from "@/store/constants";
+import { loadJson, saveJson } from "@/store/storage";
 import type {
   FilterResetKey,
   FilterState,
   SortBy,
   SortOrder,
+  ViewMode,
 } from "@/types/store";
 
 export const DEFAULT_FILTERS: FilterState = {
@@ -35,6 +39,10 @@ export function isSortBy(value: unknown): value is SortBy {
 
 export function isSortOrder(value: unknown): value is SortOrder {
   return value === "asc" || value === "desc";
+}
+
+export function isViewMode(value: unknown): value is ViewMode {
+  return value === "cards" || value === "table";
 }
 
 /**
@@ -71,6 +79,8 @@ interface FilterContextValue {
   filters: FilterState;
   setFilter: (partial: Partial<FilterState>) => void;
   resetFilters: () => void;
+  view: ViewMode;
+  setView: (view: ViewMode) => void;
 }
 
 const FilterContext = createContext<FilterContextValue | null>(null);
@@ -81,6 +91,22 @@ export function FilterProvider({
   children: React.ReactNode;
 }): React.JSX.Element {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  // SSR + first client render use cards; stored choice loads post-mount.
+  const [view, setViewState] = useState<ViewMode>("cards");
+  const [viewHydrated, setViewHydrated] = useState(false);
+
+  useEffect(() => {
+    setViewState(loadJson(STORAGE_KEYS.view, "cards", isViewMode));
+    setViewHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (viewHydrated) saveJson(STORAGE_KEYS.view, view);
+  }, [view, viewHydrated]);
+
+  const setView = useCallback((mode: ViewMode) => {
+    if (isViewMode(mode)) setViewState(mode);
+  }, []);
 
   const setFilter = useCallback((partial: Partial<FilterState>) => {
     setFilters((previous) => reduceFilters(previous, partial));
@@ -91,8 +117,8 @@ export function FilterProvider({
   }, []);
 
   const value = useMemo(
-    () => ({ filters, setFilter, resetFilters }),
-    [filters, setFilter, resetFilters],
+    () => ({ filters, setFilter, resetFilters, view, setView }),
+    [filters, setFilter, resetFilters, view, setView],
   );
   return (
     <FilterContext.Provider value={value}>{children}</FilterContext.Provider>
