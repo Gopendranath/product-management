@@ -44,14 +44,12 @@ Verify before claiming done: `pnpm typecheck && pnpm lint && pnpm build`.
 ```text
 src/
   app/            # routes: / (listing), /products/[id], /products/new
-  components/     # shared UI + ui/ primitives
+  components/     # shared UI + ui/ primitives (incl. view-toggle, listing-table-head)
   services/       # api-client (single-axis fetch, typed errors)
   store/          # split Context providers
-  hooks/          # debounced search, media, form helpers
-  types/          # strict Product, Paginated, ApiError models
-  utils/          # formatting, slugs, validation helpers
-  layouts/        # shell/nav slots
-  lib/            # shadcn utils (cn)
+  hooks/          # use-debounced-value, use-categories, use-safe-back
+  types/          # strict Product, Paginated, ApiError, store models
+  utils/          # formatting, images, validation helpers
 ```
 
 Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
@@ -59,6 +57,7 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 ## State approach
 
 - Filters: `search/category/sortBy/order/page`, `pageSize 12` const. Page resets only on search/category/sort change.
+- View: cards/table toggle on all screens, persisted (`ui-view-v1`), SSR-default cards with post-mount load. Table on narrow screens scrolls in a labelled region.
 - Favs + theme + mock-auth persist (`favs-v1`, `theme-v1`, `auth-mock-v1`) with parse guards. SSR starts light, client applies system theme.
 - Local adds: mock POST id ignored, temp `-Date.now()` assigned, memory only. Visible per display-total rule (server total + locals on page-1 default view).
 - Toasts keyed by action, max 3, single toast per failure. api-client never toasts.
@@ -77,6 +76,7 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - DummyJSON POST is mock and does not persist; reload loses local adds (accepted demo behavior).
 - Search + category + sort do not compose server-side; listing combines within the returned page.
 - Mock auth gates `/products/new` only; listing/details public. Demo-only, bypassable. No test accounts needed.
+- Layout is user-controlled (cards/table toggle); breakpoint no longer forces the layout. Table on narrow screens scrolls horizontally in a labelled region.
 - Categories fall back to `beauty, fragrances, furniture, groceries` when the API fails.
 - Lint is Biome (`pnpm lint`), not ESLint — scaffold default, accepted deviation from `TODO.md` §0 label.
 - Git root is `application/`; specs (`HLD.md`, `LLD/`, `DESIGN.md`, `TODO.md`) live one level up, outside the repo.
@@ -92,3 +92,6 @@ Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 - product-add: `/products/new` gated form, blur+submit validation, temp merge (22-check sanity, gate smoke ok).
 - shell: header/nav/theme-toggle/auth/toaster/skip-link/404/route-errors (smoke ok).
 - motion/a11y: reveal system, hover gate, 44px targets, contrast 18/19 (muted-on-canvas residual).
+- Quality sweep: dead-code removal, shared hooks (`use-safe-back`, `use-categories`), shared table head, stable store closures (favs kept state-derived so the heart updates instantly).
+- UI fixes: semantic toasts, pill nav active, listing hero rhythm, light-mode border `#D9D9D2` + card shadow for separation parity.
+- View toggle: user-controlled cards/table on all screens, persisted, skeleton follows view.
