@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Product Management Dashboard (`application/`)
 
-## Getting Started
+Responsive product dashboard. Browse, search, filter, sort, and paginate [DummyJSON](https://dummyjson.com/products) products, view details, add products via a validated form. Hiring assignment scope (~8h). Quality and maintainability over breadth.
 
-First, run the development server:
+Live URL: `TODO: add Vercel prod URL here` (preview deploys per PR).
+
+## Setup
+
+Requires Node 24 + pnpm 11 (see `packageManager` in `package.json`).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+No `.env` needed. Public DummyJSON API only. No secrets in repo.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command          | Purpose                              |
+| ---------------- | ------------------------------------ |
+| `pnpm dev`       | Local dev server                     |
+| `pnpm build`     | Production build (verify before PR)  |
+| `pnpm start`     | Serve production build               |
+| `pnpm typecheck` | `tsc --noEmit`, strict, no `any`     |
+| `pnpm lint`      | Biome check (read-only)              |
+| `pnpm lint:fix`  | Biome check with safe fixes applied  |
+| `pnpm format`    | Biome formatter                      |
 
-## Learn More
+Verify before claiming done: `pnpm typecheck && pnpm lint && pnpm build`.
 
-To learn more about Next.js, take a look at the following resources:
+## Choices
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js App Router + TypeScript strict (`noUncheckedIndexedAccess`, no `any`). SSR listing/details for first paint; client controls for filters.
+- Tailwind v4 + Shadcn/UI primitives (`src/components/ui`). Tokens in `src/app/globals.css`.
+- State: split Context providers (`src/store`): filters, favs, theme, toasts, local products, mock auth. No mega-store.
+- API: single-axis `src/services` client over `https://dummyjson.com/products` (`q` wins, else category, else base). Listing owns combine + display-total rule.
+- Motion: CSS transitions default; springs (`motion` package) isolated to drawer/modal/sheet.
+- Icons: `@phosphor-icons/react` only, stroke 1.5. Fonts: Geist + Geist Mono via `next/font`.
+- Images: `next/image` with remote patterns (`cdn.dummyjson.com`, `picsum.photos` fallback); user URLs unoptimized + placeholder.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Structure
 
-## Deploy on Vercel
+```text
+src/
+  app/            # routes: / (listing), /products/[id], /products/new
+  components/     # shared UI + ui/ primitives
+  services/       # api-client (single-axis fetch, typed errors)
+  store/          # split Context providers
+  hooks/          # debounced search, media, form helpers
+  types/          # strict Product, Paginated, ApiError models
+  utils/          # formatting, slugs, validation helpers
+  layouts/        # shell/nav slots
+  lib/            # shadcn utils (cn)
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Specs live one level up: `../HLD.md`, `../LLD/`, `../DESIGN.md`, `../TODO.md`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## State approach
+
+- Filters: `search/category/sortBy/order/page`, `pageSize 12` const. Page resets only on search/category/sort change.
+- Favs + theme + mock-auth persist (`favs-v1`, `theme-v1`, `auth-mock-v1`) with parse guards. SSR starts light, client applies system theme.
+- Local adds: mock POST id ignored, temp `-Date.now()` assigned, memory only. Visible per display-total rule (server total + locals on page-1 default view).
+- Toasts keyed by action, max 3, single toast per failure. api-client never toasts.
+
+## Assumptions and limits
+
+- DummyJSON POST is mock and does not persist; reload loses local adds (accepted demo behavior).
+- Search + category + sort do not compose server-side; listing combines within the returned page.
+- Mock auth gates `/products/new` only; listing/details public. Demo-only, bypassable. No test accounts needed.
+- Categories fall back to `beauty, fragrances, furniture, groceries` when the API fails.
+
+## Time spent
+
+- Setup + tooling: this scaffold pass.
